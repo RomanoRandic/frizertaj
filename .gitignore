@@ -7,6 +7,6 @@ gh-auth-output.txt
 .env
 .env.local
 .env*.local
+!.env.example
 node_modules/
 package-lock.json
-.env*
