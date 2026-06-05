@@ -307,7 +307,7 @@
           <div class="booking-form-wrapper">
             <form class="booking-form" id="booking-form">
               <h3>Odaberite termin</h3>
-              <p class="form-note">Demo verzija — bez stvarne rezervacije</p>
+              <p class="form-note" id="booking-status-note">Rezervacija se sprema u sustav salona</p>
 
               <div class="form-group">
                 <label for="service">Usluga</label>
@@ -351,12 +351,13 @@
                 <input type="email" id="email" name="email" placeholder="email@primjer.hr">
               </div>
 
-              <button type="submit" class="btn btn-primary btn-lg btn-full">Potvrdi rezervaciju</button>
+              <div id="booking-error" class="alert alert-error hidden" style="margin-bottom:1rem;padding:0.85rem;border-radius:12px;background:rgba(196,92,92,0.15);border:1px solid rgba(196,92,92,0.35);color:#e8a0a0;font-size:0.85rem"></div>
+              <button type="submit" class="btn btn-primary btn-lg btn-full" id="booking-submit">Potvrdi rezervaciju</button>
             </form>
             <div class="booking-success" id="booking-success" hidden>
               <div class="success-icon">✓</div>
               <h3>Termin je rezerviran!</h3>
-              <p>Hvala vam! U demo verziji ovo je samo prikaz. Za stvarnu rezervaciju koristite <a href="https://zoyya.com/en/aesthete-hairdressing" target="_blank" rel="noopener">Zoyya</a> ili nazovite nas.</p>
+              <p>Hvala vam! Potvrdu termina primit ćete putem SMS-a ili e-maila. Za promjene nas nazovite na <a href="tel:+38598617888">+385 98 617 888</a>.</p>
               <button type="button" class="btn btn-outline" id="reset-booking">Nova rezervacija</button>
             </div>
           </div>
@@ -429,6 +430,9 @@
     Naruči se
   </a>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/booking-shared.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

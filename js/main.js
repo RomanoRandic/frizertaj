@@ -24,16 +24,10 @@ const SERVICES = {
   ],
 };
 
-const TIME_SLOTS = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-  '18:00', '18:30', '19:00', '19:30',
-];
+const TIME_SLOTS = BOOKING_TIME_SLOTS;
 
-const UNAVAILABLE_SLOTS = ['10:30', '14:00', '16:30'];
-
-const IG_URL = 'https://www.instagram.com/aesthete.hairdressing/';
+let selectedTime = null;
+let bookedTimes = [];
 
 const SLIDES = [
   { src: 'images/barber.jpg', alt: 'Unutrašnjost salona', caption: 'Opustite se u našem salonu — profesionalna usluga u ugodnom ambijentu ✨', type: 'photo' },
@@ -45,7 +39,7 @@ const SLIDES = [
   { src: 'images/exterior.jpg', alt: 'Salon vanjski prikaz', caption: 'Posjetite nas u centru Zagreba 📍', type: 'photo' },
 ];
 
-let selectedTime = null;
+const IG_URL = 'https://www.instagram.com/aesthete.hairdressing/';
 
 function renderMarqueeItem(slide) {
   const isReel = slide.type === 'reel';
@@ -132,7 +126,7 @@ function renderTimeSlots() {
   if (!container) return;
 
   container.innerHTML = TIME_SLOTS.map(time => {
-    const disabled = UNAVAILABLE_SLOTS.includes(time);
+    const disabled = bookedTimes.includes(time);
     const selected = selectedTime === time;
     return `<button type="button" class="time-slot${disabled ? ' disabled' : ''}${selected ? ' selected' : ''}" data-time="${time}"${disabled ? ' disabled' : ''}>${time}</button>`;
   }).join('');
@@ -143,6 +137,19 @@ function renderTimeSlots() {
       renderTimeSlots();
     });
   });
+}
+
+async function refreshBookedTimes() {
+  const dateInput = document.getElementById('date');
+  if (!dateInput?.value || !window.AestheteSupabase?.ready) {
+    bookedTimes = [];
+    return;
+  }
+  bookedTimes = await fetchBookedTimes(dateInput.value);
+  if (selectedTime && bookedTimes.includes(selectedTime)) {
+    selectedTime = null;
+  }
+  renderTimeSlots();
 }
 
 function setMinDate() {
@@ -194,24 +201,65 @@ function initBookingForm() {
   const form = document.getElementById('booking-form');
   const success = document.getElementById('booking-success');
   const resetBtn = document.getElementById('reset-booking');
+  const dateInput = document.getElementById('date');
+  const errorEl = document.getElementById('booking-error');
+  const submitBtn = document.getElementById('booking-submit');
 
-  form?.addEventListener('submit', e => {
+  dateInput?.addEventListener('change', () => {
+    selectedTime = null;
+    refreshBookedTimes();
+  });
+
+  form?.addEventListener('submit', async e => {
     e.preventDefault();
+    errorEl?.classList.add('hidden');
+
     if (!selectedTime) {
       document.getElementById('time-slots')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    form.hidden = true;
-    success.hidden = false;
+
+    if (!window.AestheteSupabase?.ready) {
+      errorEl.textContent = 'Sustav rezervacija trenutno nije dostupan. Nazovite nas na +385 98 617 888.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Spremanje…';
+
+    try {
+      await createBooking({
+        client_name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        service: document.getElementById('service').value,
+        booking_date: document.getElementById('date').value,
+        booking_time: selectedTime,
+      });
+      form.hidden = true;
+      success.hidden = false;
+    } catch (err) {
+      const msg = err.message?.includes('unique') || err.code === '23505'
+        ? 'Odabrani termin je već zauzet. Molimo odaberite drugo vrijeme.'
+        : 'Greška pri rezervaciji. Pokušajte ponovo ili nas nazovite.';
+      errorEl.textContent = msg;
+      errorEl.classList.remove('hidden');
+      await refreshBookedTimes();
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Potvrdi rezervaciju';
+    }
   });
 
   resetBtn?.addEventListener('click', () => {
     form.reset();
     selectedTime = null;
     setMinDate();
-    renderTimeSlots();
+    refreshBookedTimes();
     form.hidden = false;
     success.hidden = true;
+    errorEl?.classList.add('hidden');
   });
 }
 
@@ -233,12 +281,18 @@ function initReveal() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initHeader();
   initTabs();
   initMarquee();
   setMinDate();
   renderTimeSlots();
+
+  await window.AestheteSupabase?.init();
+  if (window.AestheteSupabase?.configured) {
+    await refreshBookedTimes();
+  }
+
   initBookingForm();
   initReveal();
 });

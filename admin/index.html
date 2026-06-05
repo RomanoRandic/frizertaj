@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Aesthete Hairdressing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    Učitavanje…
+  </div>
+
+  <!-- Login -->
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="logo">Aesthete</div>
+        <p>Admin panel</p>
+      </div>
+      <div id="login-error" class="alert alert-error hidden"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Korisničko ime</label>
+          <input type="text" id="username" name="username" placeholder="admin" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Lozinka</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="login-btn">Prijava</button>
+      </form>
+      <p class="login-hint">
+        Zadani admin: <code>admin</code> / <code>admin</code><br>
+        (e-mail: <code>admin@aesthete.hr</code>)
+      </p>
+      <a href="../index.html" class="back-link">← Natrag na stranicu</a>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="admin-app" class="admin-app hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">Aesthete</div>
+        <span>Admin panel</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li><button type="button" class="nav-btn active" data-panel="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Pregled
+        </button></li>
+        <li><button type="button" class="nav-btn" data-panel="bookings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Rezervacije
+        </button></li>
+        <li><button type="button" class="nav-btn" data-panel="clients">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Klijenti
+        </button></li>
+        <li><button type="button" class="nav-btn" data-panel="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analitika
+        </button></li>
+      </ul>
+      <div class="sidebar-footer">
+        <div class="user-email" id="user-email"></div>
+        <button type="button" class="btn btn-outline btn-sm btn-full" id="logout-btn">Odjava</button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Izbornik">☰</button>
+        <h1 id="page-title">Pregled</h1>
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="add-booking-btn">+ Nova rezervacija</button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- Dashboard panel -->
+        <section id="panel-dashboard" class="panel active">
+          <div class="stats-grid" id="stats-grid"></div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>Rezervacije (30 dana)</h3>
+              <div class="chart-wrap"><canvas id="chart-bookings-trend"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h3>Po uslugama</h3>
+              <div class="chart-wrap"><canvas id="chart-services"></canvas></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bookings panel -->
+        <section id="panel-bookings" class="panel">
+          <div class="table-toolbar">
+            <div class="table-filters">
+              <input type="search" id="bookings-search" placeholder="Pretraži ime, telefon…">
+              <select id="bookings-status-filter">
+                <option value="">Svi statusi</option>
+                <option value="pending">Na čekanju</option>
+                <option value="confirmed">Potvrđeno</option>
+                <option value="completed">Završeno</option>
+                <option value="cancelled">Otkazano</option>
+              </select>
+              <input type="date" id="bookings-date-filter">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Vrijeme</th>
+                  <th>Klijent</th>
+                  <th>Telefon</th>
+                  <th>Usluga</th>
+                  <th>Status</th>
+                  <th>Akcije</th>
+                </tr>
+              </thead>
+              <tbody id="bookings-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Clients panel -->
+        <section id="panel-clients" class="panel">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ime</th>
+                  <th>Telefon</th>
+                  <th>E-mail</th>
+                  <th>Rezervacija</th>
+                  <th>Prva posjeta</th>
+                  <th>Zadnja posjeta</th>
+                </tr>
+              </thead>
+              <tbody id="clients-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Analytics panel -->
+        <section id="panel-analytics" class="panel">
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>Najzauzetiji dani</h3>
+              <div class="chart-wrap"><canvas id="chart-busy-days"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h3>Najzauzetija vremena</h3>
+              <div class="chart-wrap"><canvas id="chart-busy-times"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h3>Novi vs. povratni klijenti</h3>
+              <div class="chart-wrap"><canvas id="chart-client-types"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h3>Status rezervacija</h3>
+              <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit booking modal -->
+  <div id="booking-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Nova rezervacija</h2>
+        <button type="button" class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div id="modal-error" class="alert alert-error hidden"></div>
+      <form id="booking-form">
+        <input type="hidden" id="booking-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bf-name">Ime i prezime</label>
+            <input type="text" id="bf-name" required>
+          </div>
+          <div class="form-group">
+            <label for="bf-phone">Telefon</label>
+            <input type="tel" id="bf-phone" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bf-email">E-mail</label>
+          <input type="email" id="bf-email">
+        </div>
+        <div class="form-group">
+          <label for="bf-service">Usluga</label>
+          <select id="bf-service" required></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bf-date">Datum</label>
+            <input type="date" id="bf-date" required>
+          </div>
+          <div class="form-group">
+            <label for="bf-time">Vrijeme</label>
+            <select id="bf-time" required></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bf-status">Status</label>
+          <select id="bf-status">
+            <option value="pending">Na čekanju</option>
+            <option value="confirmed">Potvrđeno</option>
+            <option value="completed">Završeno</option>
+            <option value="cancelled">Otkazano</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="bf-notes">Napomene</label>
+          <textarea id="bf-notes" rows="2"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="modal-cancel">Odustani</button>
+          <button type="submit" class="btn btn-primary" id="modal-save">Spremi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="../js/supabase-config.js"></script>
+  <script src="../js/booking-shared.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>

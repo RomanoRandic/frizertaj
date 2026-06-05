@@ -3,3 +3,10 @@ Thumbs.db
 .vercel
 *.py
 zoyya-api.json
+gh-auth-output.txt
+.env
+.env.local
+.env*.local
+node_modules/
+package-lock.json
+.env*
