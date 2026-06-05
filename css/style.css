@@ -31,6 +31,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-h);
+  overflow-x: clip;
 }
 
 body {
@@ -39,7 +40,8 @@ body {
   color: var(--text);
   background: var(--bg);
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 img {
@@ -616,10 +618,7 @@ em {
 
 .ig-marquee-zone {
   position: relative;
-  width: 100vw;
-  max-width: 100%;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
   padding: 0.5rem 0 1.5rem;
 }
 
@@ -1160,6 +1159,11 @@ em {
   grid-template-columns: 1fr 1.2fr;
   gap: clamp(2rem, 4vw, 4rem);
   align-items: start;
+  min-width: 0;
+}
+
+.contact-grid > * {
+  min-width: 0;
 }
 
 .contact-text address {
@@ -1220,11 +1224,19 @@ em {
 }
 
 .map-wrapper {
+  width: 100%;
+  max-width: 100%;
   aspect-ratio: 16/10;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   min-height: 320px;
+}
+
+.map-wrapper iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Footer */
@@ -1354,6 +1366,7 @@ em {
     bottom: -1.5rem;
   }
 
+  .ig-marquee-card {
     width: clamp(220px, 70vw, 280px);
   }
 
